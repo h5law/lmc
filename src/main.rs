@@ -1,7 +1,7 @@
 use std::{
     collections::VecDeque,
     fs::File,
-    io::{prelude::*, stdin, BufReader},
+    io::{prelude::*, stdin, stdout, BufReader},
 };
 
 mod errors;
@@ -98,12 +98,6 @@ impl LMC {
             let instruction = self.mailboxes[self.counter.value() as usize];
             let opcode = instruction.value() / 100;
             let operand = (instruction.value() % 100) as usize;
-            println!(
-                "Executing instruction: {:03} [op-code: {}] [operand: {}]",
-                instruction.value(),
-                opcode,
-                operand
-            );
             match opcode {
                 1 => match self.add(operand) {
                     Ok(_) => {}
@@ -135,10 +129,13 @@ impl LMC {
                         Ok(_) => {}
                         Err(e) => return Err(e),
                     },
-                    2 => match self.write_output() {
-                        Ok(_) => {}
-                        Err(e) => return Err(e),
-                    },
+                    2 => {
+                        match self.write_output() {
+                            Ok(_) => {}
+                            Err(e) => return Err(e),
+                        }
+                        self.show_output();
+                    }
                     _ => return Err(LMCError::InvalidOpcode(format!("9{:02}", opcode))),
                 },
                 0 => return Ok(()),
@@ -255,6 +252,11 @@ impl LMC {
     }
 
     fn read_blocking(self: &Self) -> Result<ThreeDigitNumber, LMCError> {
+        print!("Input: ");
+        match stdout().flush() {
+            Ok(_) => {}
+            Err(e) => return Err(LMCError::IOError(e.to_string())),
+        }
         let mut input = String::new();
         match stdin().read_line(&mut input) {
             Ok(_) => {}
@@ -279,7 +281,7 @@ impl LMC {
         Ok(())
     }
 
-    pub fn show_output(self: Self) {
+    pub fn show_output(self: &Self) {
         match self.out_basket {
             Some(number) => println!("Output: {}", number.value()),
             None => println!("No output"),
@@ -305,5 +307,4 @@ fn main() {
             return;
         }
     }
-    lmc.show_output();
 }
