@@ -1,11 +1,10 @@
 [package]
-name = "little_minion_computer"
+name = "lmc"
 version = "0.1.0"
 edition = "2021"
-authors = "h5law"
+author = "h5law"
 readme = "./README.md"
 license = "BSD-3-Clause"
-license-file = "./LICENSE.txt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

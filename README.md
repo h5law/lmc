@@ -92,6 +92,27 @@ The little minion will read from the 3-digit number on the slip in the mailbox i
 - **BREAK (op-code 000)**
     - Instruction `000`
         - the little minion rests
+- **BRANCH (op-code 6)**
+    - Instruction `6xx`
+        - set the 2-digit counter to the value `xx`
+        - start fetch of the execution
+        - **unconditional branch**
+- **BRANCH on ZERO (op-code 7)**
+    - Instruction `7xx`
+        - goto the calculator and read the value
+            - if zero continue
+            - if not zero do nothing else
+        - set the 2-digit counter to the value `xx`
+        - start fetch of the execution
+        - **conditional branch**
+- **BRANCH on POSITIVE (op-code 8)**
+    - Instruction `8xx`
+        - goto the calculator and read the value
+            - if `NEG` flag is on continue
+            - if `NEG` flag is not present do nothing else
+        - set the 2-digit counter to the value `xx`
+        - start fetch of the execution
+        - **conditional branch**
 
 ## Calulcator
 
