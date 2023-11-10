@@ -287,12 +287,38 @@ impl LMC {
             None => println!("No output"),
         }
     }
+
+    pub fn reset(self: &mut Self) {
+        self.mailboxes = [ThreeDigitNumber::new(0).unwrap(); 100];
+        self.calculator = ThreeDigitNumber::new(0).unwrap();
+        self.in_basket = VecDeque::new();
+        self.out_basket = None;
+        self.counter = TwoDigitNumber::new(0).unwrap();
+        self.flag = None;
+    }
 }
 
 fn main() {
     let mut lmc = LMC::new();
     println!("Loading program...");
-    match lmc.load_program_from_file("program.txt".to_string()) {
+    match lmc.load_program_from_file("programs/1.lmc".to_string()) {
+        Ok(_) => {}
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    }
+    println!("Executing program...");
+    match lmc.execute_program() {
+        Ok(_) => {}
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    }
+    lmc.reset();
+    println!("Loading program...");
+    match lmc.load_program_from_file("programs/2.lmc".to_string()) {
         Ok(_) => {}
         Err(e) => {
             println!("{}", e);
