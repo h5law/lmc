@@ -25,6 +25,16 @@ pub enum Flag {
     OVERFLOW,
 }
 
+// Implement the display trait for easy printing.
+impl fmt::Display for Flag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Flag::NEG => write!(f, "NEG"),
+            Flag::OVERFLOW => write!(f, "OVERFLOW"),
+        }
+    }
+}
+
 // ThreeDigitNumber is a 3-digit decimal number from 000-999
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct ThreeDigitNumber(i16, Option<Flag>);

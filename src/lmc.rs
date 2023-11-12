@@ -165,9 +165,23 @@ impl LMC {
     // add adds the value in the mailbox at the operand to the calculator
     fn add(self: &mut Self, operand: usize) -> Result<(), LMCError> {
         let value = self.mailboxes[operand];
+        self.logger.log(
+            &LogLevel::Debug,
+            &format!(
+                "adding: {} + {}",
+                self.calculator.to_string(),
+                value.to_string()
+            ),
+        );
         self.calculator += value;
         match self.calculator.flag() {
-            Some(flag) => self.flag = Some(flag),
+            Some(flag) => {
+                self.logger.log(
+                    &LogLevel::Debug,
+                    &format!("setting flag: {}", flag.to_string()),
+                );
+                self.flag = Some(flag)
+            }
             None => self.flag = None,
         }
         self.counter += match TwoDigitNumber::new(1) {
@@ -180,9 +194,23 @@ impl LMC {
     // sub subtracts the value at the operand from the calculator
     fn sub(self: &mut Self, operand: usize) -> Result<(), LMCError> {
         let value = self.mailboxes[operand];
+        self.logger.log(
+            &LogLevel::Debug,
+            &format!(
+                "subtracting: {} - {}",
+                self.calculator.to_string(),
+                value.to_string()
+            ),
+        );
         self.calculator -= value;
         match self.calculator.flag() {
-            Some(flag) => self.flag = Some(flag),
+            Some(flag) => {
+                self.logger.log(
+                    &LogLevel::Debug,
+                    &format!("setting flag: {}", flag.to_string()),
+                );
+                self.flag = Some(flag)
+            }
             None => self.flag = None,
         }
         self.counter += match TwoDigitNumber::new(1) {
@@ -196,6 +224,10 @@ impl LMC {
     fn sto(self: &mut Self, operand: usize) -> Result<(), LMCError> {
         let value = self.calculator;
         self.mailboxes[operand] = value;
+        self.logger.log(
+            &LogLevel::Debug,
+            &format!("storing to {}: {}", operand as u8, value.to_string()),
+        );
         self.counter += match TwoDigitNumber::new(1) {
             Ok(number) => number,
             Err(e) => return Err(e.into()),
@@ -207,6 +239,10 @@ impl LMC {
     fn lda(self: &mut Self, operand: usize) -> Result<(), LMCError> {
         let value = self.mailboxes[operand];
         self.calculator = value;
+        self.logger.log(
+            &LogLevel::Debug,
+            &format!("loading from {}: {}", operand as u8, value.to_string()),
+        );
         self.counter += match TwoDigitNumber::new(1) {
             Ok(number) => number,
             Err(e) => return Err(e.into()),
@@ -216,6 +252,10 @@ impl LMC {
 
     // br sets the program counter to the operand (branch unconditional)
     fn br(self: &mut Self, operand: usize) {
+        self.logger.log(
+            &LogLevel::Debug,
+            &format!("setting counter to {}", operand as u8),
+        );
         self.counter = TwoDigitNumber::new(operand as u8).unwrap();
     }
 
@@ -223,6 +263,10 @@ impl LMC {
     // if the calculator is not 0 then the counter is incremented by 1 (branch zero)
     fn brz(self: &mut Self, operand: usize) -> Result<(), LMCError> {
         if self.calculator.value() == 0 {
+            self.logger.log(
+                &LogLevel::Debug,
+                &format!("setting counter to {}", operand as u8),
+            );
             self.counter = TwoDigitNumber::new(operand as u8).unwrap();
         } else {
             self.counter += match TwoDigitNumber::new(1) {
@@ -247,7 +291,11 @@ impl LMC {
                 }
                 _ => {
                     self.counter = match TwoDigitNumber::new(operand as u8) {
-                        Ok(number) => number,
+                        Ok(number) => {
+                            self.logger
+                                .log(&LogLevel::Debug, &format!("setting counter to {}", number));
+                            number
+                        }
                         Err(e) => return Err(e.into()),
                     };
                     return Ok(());
@@ -255,7 +303,11 @@ impl LMC {
             },
             None => {
                 self.counter = match TwoDigitNumber::new(operand as u8) {
-                    Ok(number) => number,
+                    Ok(number) => {
+                        self.logger
+                            .log(&LogLevel::Debug, &format!("setting counter to {}", number));
+                        number
+                    }
                     Err(e) => return Err(e.into()),
                 };
                 return Ok(());
