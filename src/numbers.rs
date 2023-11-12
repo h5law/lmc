@@ -3,6 +3,21 @@ use std::{
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
+// NumberError is used to indicate an error with a number
+#[derive(Debug, PartialEq)]
+pub enum NumberError {
+    OutOfBounds(usize),
+}
+
+// Implement the display trait for easy printing.
+impl fmt::Display for NumberError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            NumberError::OutOfBounds(value) => write!(f, "number out of bounds: got {}", value),
+        }
+    }
+}
+
 // Flag are used to indicate the state of the last operation
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Flag {
@@ -15,19 +30,19 @@ pub enum Flag {
 pub struct ThreeDigitNumber(i16, Option<Flag>);
 
 impl ThreeDigitNumber {
-    pub fn new(value: i16) -> Result<Self, String> {
+    pub fn new(value: i16) -> Result<Self, NumberError> {
         if 0 <= value && value <= 999 {
             Ok(ThreeDigitNumber(value, None))
         } else {
-            Err("Out of bounds: must be in the range 000-999".into())
+            Err(NumberError::OutOfBounds(value as usize))
         }
     }
 
-    pub fn new_with_flag(value: i16, flag: Option<Flag>) -> Result<Self, String> {
+    pub fn new_with_flag(value: i16, flag: Option<Flag>) -> Result<Self, NumberError> {
         if 0 <= value && value <= 999 {
             Ok(ThreeDigitNumber(value, flag))
         } else {
-            Err("Out of bounds: must be in the range 000-999".into())
+            Err(NumberError::OutOfBounds(value as usize))
         }
     }
 
@@ -42,7 +57,7 @@ impl ThreeDigitNumber {
 
 // Implement the Add trait for ThreeDigitNumber.
 impl Add for ThreeDigitNumber {
-    type Output = Result<Self, String>;
+    type Output = Result<Self, NumberError>;
 
     fn add(self, other: Self) -> Self::Output {
         let sum = self.value() + other.value();
@@ -63,7 +78,7 @@ impl AddAssign for ThreeDigitNumber {
 
 // Implement the Sub trait for ThreeDigitNumber.
 impl Sub for ThreeDigitNumber {
-    type Output = Result<Self, String>;
+    type Output = Result<Self, NumberError>;
 
     fn sub(self, other: Self) -> Self::Output {
         let diff = self.value() - other.value();
@@ -94,34 +109,30 @@ impl fmt::Display for ThreeDigitNumber {
 pub struct TwoDigitNumber(u8, Option<Flag>);
 
 impl TwoDigitNumber {
-    pub fn new(value: u8) -> Result<Self, String> {
+    pub fn new(value: u8) -> Result<Self, NumberError> {
         if value <= 99 {
             Ok(TwoDigitNumber(value, None))
         } else {
-            Err("Out of bounds: must be in the range 00-99".into())
+            Err(NumberError::OutOfBounds(value as usize))
         }
     }
 
-    pub fn new_with_flag(value: u8, flag: Option<Flag>) -> Result<Self, String> {
+    pub fn new_with_flag(value: u8, flag: Option<Flag>) -> Result<Self, NumberError> {
         if value <= 99 {
             Ok(TwoDigitNumber(value, flag))
         } else {
-            Err("Out of bounds: must be in the range 00-99".into())
+            Err(NumberError::OutOfBounds(value as usize))
         }
     }
 
     pub fn value(&self) -> u8 {
         self.0
     }
-
-    pub fn flag(&self) -> Option<Flag> {
-        self.1
-    }
 }
 
 // Implement the Add trait for TwoDigitNumber.
 impl Add for TwoDigitNumber {
-    type Output = Result<Self, String>;
+    type Output = Result<Self, NumberError>;
 
     fn add(self, other: Self) -> Self::Output {
         let sum = self.value() + other.value();
