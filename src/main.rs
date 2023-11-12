@@ -54,8 +54,20 @@ fn main() {
     // Execute the command
     let cmd = *commands.get(0).unwrap();
     if cmd == &"assemble".to_string() {
-        let input_file = commands.get(1).unwrap();
-        let output_file = commands.get(2).unwrap();
+        let input_file = match commands.get(1) {
+            Some(file) => file,
+            None => {
+                print_usage();
+                return;
+            }
+        };
+        let output_file = match commands.get(2) {
+            Some(file) => file,
+            None => {
+                print_usage();
+                return;
+            }
+        };
         let mut input = BufReader::new(File::open(input_file).unwrap())
             .lines()
             .map(|line| line.unwrap())
@@ -73,31 +85,43 @@ fn main() {
             writeln!(output, "{}", instruction.to_string()).unwrap();
         }
     } else if cmd == &"execute".to_string() {
-        let input_file = commands.get(1).unwrap();
-        let mut input = BufReader::new(File::open(input_file).unwrap())
-            .lines()
-            .map(|line| match line {
-                Ok(line) => line,
-                Err(err) => {
-                    logger.log(&LogLevel::Error, &format!("{}", err));
-                    exit(1);
-                }
-            })
-            .map(|line| match line.trim().parse::<i16>() {
-                Ok(number) => number,
-                Err(err) => {
-                    logger.log(&LogLevel::Error, &format!("{}", err));
-                    exit(1);
-                }
-            })
-            .map(|instruction| match ThreeDigitNumber::new(instruction) {
-                Ok(number) => number,
-                Err(err) => {
-                    logger.log(&LogLevel::Error, &format!("{}", err));
-                    exit(1);
-                }
-            })
-            .collect::<Vec<ThreeDigitNumber>>();
+        let input_file = match commands.get(1) {
+            Some(file) => file,
+            None => {
+                print_usage();
+                return;
+            }
+        };
+        let mut input = BufReader::new(match File::open(input_file) {
+            Ok(file) => file,
+            Err(err) => {
+                logger.log(&LogLevel::Error, &format!("{}", err));
+                exit(1);
+            }
+        })
+        .lines()
+        .map(|line| match line {
+            Ok(line) => line,
+            Err(err) => {
+                logger.log(&LogLevel::Error, &format!("{}", err));
+                exit(1);
+            }
+        })
+        .map(|line| match line.trim().parse::<i16>() {
+            Ok(number) => number,
+            Err(err) => {
+                logger.log(&LogLevel::Error, &format!("{}", err));
+                exit(1);
+            }
+        })
+        .map(|instruction| match ThreeDigitNumber::new(instruction) {
+            Ok(number) => number,
+            Err(err) => {
+                logger.log(&LogLevel::Error, &format!("{}", err));
+                exit(1);
+            }
+        })
+        .collect::<Vec<ThreeDigitNumber>>();
         let mut lmc = LMC::new(verbose, debug);
         match lmc.load_program(&mut input) {
             Ok(_) => (),

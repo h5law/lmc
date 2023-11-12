@@ -2,11 +2,49 @@
 
 📌 **LMC** or **L**ittle **M**inion **C**omputer is a toy example of a machine architecture
 
-**NOTE:** The LMC uses decimal arithmetic **not** binary arithmetic
+## Usage
+
+This tool enables both the execution of LMC assembly language, via the LMC VM.
+As well as the assembling of LMC assembly language into machine code, via the
+assembler.
+
+To run the tool first clone the repo and build the binary:
+
+```sh
+$ git clone https://github.com/h5law/lmc
+$ cd lmc
+$ cargo build -r
+$ cp ./target/release/lmc ~/.local/bin
+```
+
+After the tool is in your `PATH` you will be able to execute it, assemble LMC
+programs and run them.
+
+```sh
+$ lmc -h
+Usage: lmc <command> <flags>
+
+Commands:
+	assemble <input file> <output file>
+	execute <input file>
+
+Flags:
+	-h, --help	Show this help message
+	-v, --verbose	Show verbose output
+	-d, --debug	Show debug output
+```
+
+## Examples
+
+The [programs](./programs) directory contains some example programs, in both
+LMC machine code and LMC assembly that can give some insight into how to write
+your own programs and how the VM operates.
 
 ## Design
 
 ![LMC High Level Design](./lmc-design.png "LMC High Level Design")
+
+**NOTE:** The LMC uses decimal arithmetic **not** binary arithmetic
 
 ### Mailboxes
 
@@ -37,7 +75,8 @@
 
 - The user can put slips of paper with 3 digits on them into the input tray
     - these are to be read when the little minion next looks at the tray
-- The little minion can write 3 digits on a slip of paper and put them in the out tray
+- The little minion can write 3 digits on a slip of paper and put them in the
+out tray
     - these are to be read by the user
 
 ## Workflow
@@ -60,7 +99,9 @@ The little minion controlling the computer follows the steps listed below:
 
 ## Instruction Set
 
-The little minion will read from the 3-digit number on the slip in the mailbox it was sent to, these are ********op-codes******** and instruct the little minion as to what to do.
+The little minion will read from the 3-digit number on the slip in the mailbox
+it was sent to, these are ********op-codes******** and instruct the little minion as to what to
+do.
 
 ### ****************Op Codes****************
 
@@ -71,17 +112,21 @@ The little minion will read from the 3-digit number on the slip in the mailbox i
 - **STORE (op-code 3)**
     - Instruction `3xx`
         - goto the calculator and read the 3-digit number displayed
-        - goto mailbox address `xx` and set its contents to be the 3-digit number from the calculator
+        - goto mailbox address `xx` and set its contents to be the 3-digit number
+        from the calculator
     - This is a copy and does not overwrite the calculator
 - **ADD (op-code 1)**
     - Instruction `1xx`
         - goto the mailbox address `xx` and read the 3-digit number stored there
-        - goto the calculator and add the number to the number already on the calculator
+        - goto the calculator and add the number to the number already on the
+        calculator
 - **SUBTRACT (op-code 2)**
     - Instruction `2xx`
         - goto the mailbox address `xx` and read the 3-digit number stored there
-        - goto the calculator and subtract the number from the number already on the calculator
-        - If the number read from memory address `xx` is larger than the current number in the calculator then raise the `NEG` flag
+        - goto the calculator and subtract the number from the number already on
+        the calculator
+        - If the number read from memory address `xx` is larger than the current
+        number in the calculator then raise the `NEG` flag
 - **I/O (op-codes 901 and 902)**
     - Instruction `901` (**READ**)
         - goto the `IN` tray read the 3-digit number there
@@ -124,19 +169,23 @@ In the LMC **all** actions go through the calculator
 - To read from the input and write to the mailbox address `xx`
     - `901`
     - `3xx`
-- To add the values stored in mailbox addresses `xx` and `yy` and store this in `xx`
+- To add the values stored in mailbox addresses `xx` and `yy` and store this in
+`xx`
     - `5xx`
     - `1yy`
     - `3xx`
 
 ## Fetch and Execute
 
-The steps taken by the little minion are called the **instruction cycle**. The instruction cycle has 2 stages:
+The steps taken by the little minion are called the **instruction cycle**. The
+instruction cycle has 2 stages:
 
 - **********Fetch**********
     - the little minion finds the instruction to execute
         - the minion goes to the counter
-        - reads the address there (and then increments it to be ready for the next cycle)
-        - the minion goes to the mailbox at that address and reads the 3-digit number in the mailbox
+        - reads the address there (and then increments it to be ready for the
+        next cycle)
+        - the minion goes to the mailbox at that address and reads the 3-digit
+        number in the mailbox
 - ********Execute********
     - the little minion performs the work specified in the instruction
