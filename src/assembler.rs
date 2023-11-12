@@ -10,7 +10,7 @@ use crate::{
 pub enum AssemblerError {
     InvalidOpcode(String),
     InvalidLabel(String),
-    InvalidNumberOfMneumonics(usize),
+    InvalidNumberOfMneumonics(usize, String),
     EmptyInput,
     TooManyLinesOfInput(usize),
 }
@@ -23,8 +23,12 @@ impl fmt::Display for AssemblerError {
                 write!(f, "invalid opcode: got {}", opcode)
             }
             AssemblerError::InvalidLabel(label) => write!(f, "invalid label: got {}", label),
-            AssemblerError::InvalidNumberOfMneumonics(line) => {
-                write!(f, "invalid number of mneumonics in line: got {}", line)
+            AssemblerError::InvalidNumberOfMneumonics(index, line) => {
+                write!(
+                    f,
+                    "invalid number of mneumonics in line {}: {}",
+                    index, line
+                )
             }
             AssemblerError::EmptyInput => write!(f, "empty input"),
             AssemblerError::TooManyLinesOfInput(lines) => {
@@ -171,7 +175,10 @@ impl Assembler {
                 }
                 // Anything else is invalid
                 n => {
-                    return Err(AssemblerError::InvalidNumberOfMneumonics(n));
+                    return Err(AssemblerError::InvalidNumberOfMneumonics(
+                        n,
+                        line.to_string(),
+                    ));
                 }
             }
         }
