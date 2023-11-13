@@ -187,6 +187,8 @@ impl LMC {
             }
             None => self.flag = None,
         }
+        self.logger
+            .log(&LogLevel::Debug, &format!("incrementing counter by 1\n",));
         self.counter += match TwoDigitNumber::new(1) {
             Ok(number) => number,
             Err(e) => return Err(e.into()),
@@ -216,6 +218,8 @@ impl LMC {
             }
             None => self.flag = None,
         }
+        self.logger
+            .log(&LogLevel::Debug, &format!("incrementing counter by 1\n",));
         self.counter += match TwoDigitNumber::new(1) {
             Ok(number) => number,
             Err(e) => return Err(e.into()),
@@ -231,6 +235,8 @@ impl LMC {
             &LogLevel::Debug,
             &format!("storing to {}: {}", operand as u8, value.to_string()),
         );
+        self.logger
+            .log(&LogLevel::Debug, &format!("incrementing counter by 1\n",));
         self.counter += match TwoDigitNumber::new(1) {
             Ok(number) => number,
             Err(e) => return Err(e.into()),
@@ -246,6 +252,8 @@ impl LMC {
             &LogLevel::Debug,
             &format!("loading from {}: {}", operand as u8, value.to_string()),
         );
+        self.logger
+            .log(&LogLevel::Debug, &format!("incrementing counter by 1\n",));
         self.counter += match TwoDigitNumber::new(1) {
             Ok(number) => number,
             Err(e) => return Err(e.into()),
@@ -257,7 +265,7 @@ impl LMC {
     fn br(self: &mut Self, operand: usize) {
         self.logger.log(
             &LogLevel::Debug,
-            &format!("setting counter to {}", operand as u8),
+            &format!("branch: setting counter to {}\n", operand as u8),
         );
         self.counter = TwoDigitNumber::new(operand as u8).unwrap();
     }
@@ -268,10 +276,14 @@ impl LMC {
         if self.calculator.value() == 0 {
             self.logger.log(
                 &LogLevel::Debug,
-                &format!("setting counter to {}", operand as u8),
+                &format!("branch zero: setting counter to {}\n", operand as u8),
             );
             self.counter = TwoDigitNumber::new(operand as u8).unwrap();
         } else {
+            self.logger.log(
+                &LogLevel::Debug,
+                &format!("branch zero: incrementing counter by 1\n"),
+            );
             self.counter += match TwoDigitNumber::new(1) {
                 Ok(number) => number,
                 Err(e) => return Err(e.into()),
@@ -286,6 +298,10 @@ impl LMC {
         match self.flag {
             Some(flag) => match flag {
                 Flag::NEG => {
+                    self.logger.log(
+                        &LogLevel::Debug,
+                        &format!("branch positive: incrementing counter by 1\n",),
+                    );
                     self.counter += match TwoDigitNumber::new(1) {
                         Ok(number) => number,
                         Err(e) => return Err(e.into()),
@@ -295,8 +311,10 @@ impl LMC {
                 _ => {
                     self.counter = match TwoDigitNumber::new(operand as u8) {
                         Ok(number) => {
-                            self.logger
-                                .log(&LogLevel::Debug, &format!("setting counter to {}", number));
+                            self.logger.log(
+                                &LogLevel::Debug,
+                                &format!("branch positive: setting counter to {}\n", number),
+                            );
                             number
                         }
                         Err(e) => return Err(e.into()),
@@ -307,8 +325,10 @@ impl LMC {
             None => {
                 self.counter = match TwoDigitNumber::new(operand as u8) {
                     Ok(number) => {
-                        self.logger
-                            .log(&LogLevel::Debug, &format!("setting counter to {}", number));
+                        self.logger.log(
+                            &LogLevel::Debug,
+                            &format!("branch positive: setting counter to {}\n", number),
+                        );
                         number
                     }
                     Err(e) => return Err(e.into()),
@@ -386,6 +406,8 @@ impl LMC {
 
     // reset_counter resets the program counter to 0
     pub fn reset_counter(self: &mut Self) {
+        self.logger
+            .log(&LogLevel::Debug, &format!("resetting counter to 0\n",));
         self.counter = TwoDigitNumber::new(0).unwrap();
     }
 

@@ -173,12 +173,27 @@ fn main() {
                         exit(1);
                     }
                 }
-                if test.result != lmc.get_output() {
+                let got = match lmc.get_output() {
+                    Some(result) => format!("{:03}", result.value().to_string()),
+                    None => "None".to_string(),
+                };
+                let expected = match test.result {
+                    Some(result) => format!("{:03}", result.value().to_string()),
+                    None => "None".to_string(),
+                };
+                if got != expected {
+                    let inputs = match test.input {
+                        Some(ref input) => input
+                            .iter()
+                            .map(|number| format!("{:03}", number.value().to_string()))
+                            .collect::<Vec<String>>(),
+                        None => vec![],
+                    };
                     logger.log(
                         &LogLevel::Error,
                         &format!(
-                            "[{}] Incorrect result for inputs [{:?}]: got {:?}",
-                            test.name, test.input, test.result
+                            "[{}] Incorrect result for inputs [{:?}]: got {}, expected {}",
+                            test.name, inputs, got, expected,
                         ),
                     );
                 }

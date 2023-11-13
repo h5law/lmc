@@ -196,7 +196,7 @@ impl Assembler {
                     result[i] = opcode.to_number();
                     self.logger.log(
                         &LogLevel::Debug,
-                        format!("{}: {}", i, opcode.to_number()).as_str(),
+                        format!("{}:\t{}", i, opcode.to_number()).as_str(),
                     );
                 }
                 // Two parts - either a label and an opcode, or an opcode and an operand
@@ -220,7 +220,7 @@ impl Assembler {
                             result[i] = instruction.unwrap();
                             self.logger.log(
                                 &LogLevel::Debug,
-                                format!("{}: {}", i, (opcode.to_number() + value).unwrap())
+                                format!("{}:\t{}", i, (opcode.to_number() + value).unwrap())
                                     .as_str(),
                             );
                         }
@@ -249,7 +249,7 @@ impl Assembler {
                                 ThreeDigitNumber::new(parts[2].parse::<i16>().unwrap()).unwrap();
                             result[i] = value;
                             self.logger
-                                .log(&LogLevel::Debug, format!("{}: {}", i, value).as_str());
+                                .log(&LogLevel::Debug, format!("{}:\t{}", i, value).as_str());
                             continue;
                         }
                         // Otherwise, the operand is an index to a label in the hashmap so continue
@@ -269,7 +269,7 @@ impl Assembler {
                     result[i] = instruction.unwrap();
                     self.logger.log(
                         &LogLevel::Debug,
-                        format!("{}: {}", i, (opcode.to_number() + value).unwrap()).as_str(),
+                        format!("{}:\t{}", i, (opcode.to_number() + value).unwrap()).as_str(),
                     );
                 }
                 _ => {}
