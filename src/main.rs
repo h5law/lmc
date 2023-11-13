@@ -156,7 +156,7 @@ fn main() {
                 exit(1);
             }
         }
-        for test in tests {
+        'outer: for test in tests {
             println!(
                 "Running test: {} [{} iterations]",
                 test.name, test.iterations
@@ -196,6 +196,7 @@ fn main() {
                             test.name, inputs, got, expected,
                         ),
                     );
+                    break 'outer;
                 }
                 lmc.reset_counter();
             }
