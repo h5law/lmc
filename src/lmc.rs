@@ -60,11 +60,13 @@ pub struct LMC {
     flag: Option<Flag>,
     // logger is used to log messages to the console
     logger: Logger,
+    // quite is used to suppress output to the console
+    quiet: bool,
 }
 
 impl LMC {
     // new creates a new LMC with all values initialized to 0
-    pub fn new(verbose: bool, debug: bool) -> Self {
+    pub fn new(verbose: bool, debug: bool, quiet: bool) -> Self {
         LMC {
             mailboxes: [ThreeDigitNumber::new(0).unwrap(); 100],
             calculator: ThreeDigitNumber::new(0).unwrap(),
@@ -73,6 +75,7 @@ impl LMC {
             counter: TwoDigitNumber::new(0).unwrap(),
             flag: None,
             logger: Logger::new(verbose, debug),
+            quiet,
         }
     }
 
@@ -368,9 +371,28 @@ impl LMC {
 
     // show_output prints the value in the output_tray to stdout
     pub fn show_output(self: &Self) {
+        if self.quiet {
+            return;
+        }
         match self.out_basket {
-            Some(number) => println!("Output: {}", number.value()),
-            None => println!("No output"),
+            Some(number) => println!("{}", number.value()),
+            None => (),
+        }
+    }
+
+    pub fn get_output(self: &Self) -> Option<ThreeDigitNumber> {
+        self.out_basket
+    }
+
+    // reset_counter resets the program counter to 0
+    pub fn reset_counter(self: &mut Self) {
+        self.counter = TwoDigitNumber::new(0).unwrap();
+    }
+
+    // load_input fills the input queue with the provided values
+    pub fn load_input(self: &mut Self, input: &Vec<ThreeDigitNumber>) {
+        for number in input {
+            self.in_basket.push_back(*number);
         }
     }
 }
