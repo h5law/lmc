@@ -27,11 +27,32 @@ Usage: lmc <command> <flags>
 Commands:
 	assemble <input file> <output file>
 	execute <input file>
+	batch <program file> <batch file>
 
 Flags:
 	-h, --help	Show this help message
 	-v, --verbose	Show verbose output
 	-d, --debug	Show debug output
+```
+
+## Batching
+
+The LMC VM supports batch execution for testing your programs. In order to do
+this you must first write a program and then a test file. The test file can
+preload inputs into the LMC's `input_tray` which is a queue under the hood.
+
+The test file must have the following format:
+
+```
+test_name;input1,input2,...,input_n;result;iterations
+```
+
+Here the only mandatory fields are the `test_name` and number of `iterations`,
+however even if not included the other fields must be left empty in order to
+correctly parse the test file. A test without inputs or result would be:
+
+```
+test_name;;;iterations
 ```
 
 ## Examples
