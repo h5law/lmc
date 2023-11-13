@@ -9,10 +9,10 @@
 # ***********************
 
 # Input and store the values of a and b.
-		IN
-		STO		a
-		IN
-		STO		b
+        IN
+        STO     a
+        IN
+        STO     b
 
 # *************************
 # initialise variable count
@@ -22,8 +22,8 @@
 # This is the only difference with the non-robust version
 # (and that we have to define zero in the data section).
 
-		LDA		zero
-		STO		count
+        LDA     zero
+        STO     count
 
 
 # *********
@@ -35,13 +35,13 @@
 # For every b we subtract from a we increment the variable count,
 # that is, we add 1 to the quotient.
 
-start	LDA		count
-		ADD		one
-		STO		count
-		LDA		a
-		SUB		b
-		STO		a
-		BRP		start
+start   LDA     count
+        ADD     one
+        STO     count
+        LDA     a
+        SUB     b
+        STO     a
+        BRP     start
 
 # **********************************
 # final computation, print, and exit
@@ -51,16 +51,16 @@ start	LDA		count
 # at the end of the above loop the count is the quotient +1.
 # We subtract 1 to find the correct quotient, print, and halt.
 
-done	LDA		count
-		SUB		one
-		OUT
-		HLT
+done    LDA     count
+        SUB     one
+        OUT
+        HLT
 
 # ****
 # data
 # ****
-a		DAT		000
-b		DAT		000
-count	DAT		000
-one		DAT		001
-zero	DAT		000
+a       DAT     000
+b       DAT     000
+count   DAT     000
+one     DAT     001
+zero    DAT     000
