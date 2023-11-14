@@ -101,8 +101,12 @@ impl LMC {
     // reaches the end of the program, signified by a 000 instruction.
     pub fn execute_program(self: &mut Self) -> Result<(), LMCError> {
         self.logger.log(&LogLevel::Info, "executing program...");
+        // set a counter for the number of fetch-execute cycles
+        let mut cycles = 0;
         // loop infinitely until we reach the end of the program
         loop {
+            // increment the number of cycles
+            cycles += 1;
             // fetch the instruction from the mailbox at the counter
             let instruction = self.mailboxes[self.counter.value() as usize];
             // retrieve the opcode and operand from the instruction
@@ -158,7 +162,13 @@ impl LMC {
                     _ => return Err(LMCError::InvalidOpcode(format!("9{:02}", opcode))),
                 },
                 // 0 is the halt instruction and signifies the end of the program
-                0 => return Ok(()),
+                0 => {
+                    self.logger.log(
+                        &LogLevel::Info,
+                        &format!("program halted after {} cycles", cycles),
+                    );
+                    return Ok(());
+                }
                 // any other opcode is invalid
                 _ => return Err(LMCError::InvalidOpcode(format!("{:03}", opcode))),
             }
