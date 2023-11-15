@@ -258,6 +258,7 @@ impl LMC {
     fn lda(self: &mut Self, operand: usize) -> Result<(), LMCError> {
         let value = self.mailboxes[operand];
         self.calculator = value;
+        self.flag = None;
         self.logger.log(
             &LogLevel::Debug,
             &format!("loading from {}: {}", operand as u8, value.to_string()),
