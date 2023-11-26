@@ -16,6 +16,7 @@ pub enum LMCError {
     ProgramTooLarge(usize),
     IOError(String),
     InvalidOpcode(String),
+    MaxCyclesHit(usize),
 }
 
 // Implement the display trait for easy printing.
@@ -28,6 +29,7 @@ impl fmt::Display for LMCError {
             LMCError::IOError(value) => write!(f, "IO error: {}", value.to_string()),
             LMCError::InvalidOpcode(value) => write!(f, "invalid opcode: {}", value),
             LMCError::NumberError(value) => write!(f, "number error: {}", value.to_string()),
+            LMCError::MaxCyclesHit(value) => write!(f, "max cycles hit: {}", value),
         }
     }
 }
@@ -62,11 +64,14 @@ pub struct LMC {
     logger: Logger,
     // quite is used to suppress output to the console
     quiet: bool,
+    // max_cycle count is used to keep track of the max number of fetch-execute
+    // cycles the LMC can perform during the execution of a program
+    max_cycles: usize,
 }
 
 impl LMC {
     // new creates a new LMC with all values initialized to 0
-    pub fn new(verbose: bool, debug: bool, quiet: bool) -> Self {
+    pub fn new(verbose: bool, debug: bool, quiet: bool, max_cycles: usize) -> Self {
         LMC {
             mailboxes: [ThreeDigitNumber::new(0).unwrap(); 100],
             calculator: ThreeDigitNumber::new(0).unwrap(),
@@ -76,6 +81,7 @@ impl LMC {
             flag: None,
             logger: Logger::new(verbose, debug),
             quiet,
+            max_cycles,
         }
     }
 
@@ -102,11 +108,14 @@ impl LMC {
     pub fn execute_program(self: &mut Self) -> Result<(), LMCError> {
         self.logger.log(&LogLevel::Info, "executing program...");
         // set a counter for the number of fetch-execute cycles
-        let mut cycles = 0;
         // loop infinitely until we reach the end of the program
+        let mut cycles = 0;
         loop {
             // increment the number of cycles
             cycles += 1;
+            if self.max_cycles == cycles {
+                return Err(LMCError::MaxCyclesHit(self.max_cycles));
+            }
             // fetch the instruction from the mailbox at the counter
             let instruction = self.mailboxes[self.counter.value() as usize];
             // retrieve the opcode and operand from the instruction
@@ -420,6 +429,10 @@ impl LMC {
         self.logger
             .log(&LogLevel::Debug, &format!("resetting counter to 0\n",));
         self.counter = TwoDigitNumber::new(0).unwrap();
+    }
+
+    pub fn set_max_cycles(self: &mut Self, max_cycles: usize) {
+        self.max_cycles = max_cycles;
     }
 
     // load_input fills the input queue with the provided values

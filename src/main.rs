@@ -19,7 +19,7 @@ struct Test {
     name: String,
     input: Option<Vec<ThreeDigitNumber>>,
     result: Option<ThreeDigitNumber>,
-    iterations: usize,
+    cycles: usize,
 }
 
 impl Test {
@@ -27,13 +27,13 @@ impl Test {
         name: &String,
         input: Option<Vec<ThreeDigitNumber>>,
         result: Option<ThreeDigitNumber>,
-        iterations: usize,
+        cycles: usize,
     ) -> Test {
         Test {
             name: name.clone(),
             input,
             result,
-            iterations,
+            cycles,
         }
     }
 }
@@ -116,7 +116,7 @@ fn main() {
             }
         };
         let input = parse_program_file(&logger, program_file);
-        let mut lmc = LMC::new(verbose, debug, false);
+        let mut lmc = LMC::new(verbose, debug, false, 50000);
         match lmc.load_program(&input) {
             Ok(_) => (),
             Err(err) => {
@@ -148,7 +148,7 @@ fn main() {
         };
         let input = parse_program_file(&logger, program_file);
         let tests = parse_test_file(&logger, test_file);
-        let mut lmc = LMC::new(verbose, debug, true);
+        let mut lmc = LMC::new(verbose, debug, true, 50000);
         match lmc.load_program(&input) {
             Ok(_) => (),
             Err(err) => {
@@ -157,49 +157,44 @@ fn main() {
             }
         }
         'outer: for test in tests {
-            println!(
-                "Running test: {} [{} iterations]",
-                test.name, test.iterations
-            );
-            for _ in 0..test.iterations {
-                match &test.input {
-                    Some(input) => lmc.load_input(input),
-                    None => (),
-                }
-                match lmc.execute_program() {
-                    Ok(_) => (),
-                    Err(err) => {
-                        logger.log(&LogLevel::Error, &format!("{}", err));
-                        exit(1);
-                    }
-                }
-                let got = match lmc.get_output() {
-                    Some(result) => format!("{:03}", result.value().to_string()),
-                    None => "None".to_string(),
-                };
-                let expected = match test.result {
-                    Some(result) => format!("{:03}", result.value().to_string()),
-                    None => "None".to_string(),
-                };
-                if got != expected {
-                    let inputs = match test.input {
-                        Some(ref input) => input
-                            .iter()
-                            .map(|number| format!("{:03}", number.value().to_string()))
-                            .collect::<Vec<String>>(),
-                        None => vec![],
-                    };
-                    logger.log(
-                        &LogLevel::Error,
-                        &format!(
-                            "[{}] Incorrect result for inputs [{:?}]: got {}, expected {}",
-                            test.name, inputs, got, expected,
-                        ),
-                    );
-                    break 'outer;
-                }
-                lmc.reset_counter();
+            lmc.set_max_cycles(test.cycles);
+            println!("Running test: {} [{} max cycles]", test.name, test.cycles);
+            match &test.input {
+                Some(input) => lmc.load_input(input),
+                None => (),
             }
+            match lmc.execute_program() {
+                Ok(_) => (),
+                Err(err) => {
+                    logger.log(&LogLevel::Error, &format!("{}", err));
+                    exit(1);
+                }
+            }
+            let got = match lmc.get_output() {
+                Some(result) => format!("{:03}", result.value().to_string()),
+                None => "None".to_string(),
+            };
+            let expected = match test.result {
+                Some(result) => format!("{:03}", result.value().to_string()),
+                None => "None".to_string(),
+            };
+            if got != expected {
+                let inputs = match test.input {
+                    Some(ref input) => input
+                        .iter()
+                        .map(|number| format!("{:03}", number.value().to_string()))
+                        .collect::<Vec<String>>(),
+                    None => vec![],
+                };
+                logger.log(
+                    &LogLevel::Error,
+                    &format!(
+                        "[{}] Incorrect result for inputs [{:?}]: got {}, expected {}",
+                        test.name, inputs, got, expected,
+                    ),
+                );
+            }
+            lmc.reset_counter();
         }
     } else {
         print_usage();
@@ -272,12 +267,12 @@ fn parse_test_file(logger: &Logger, test_file: &str) -> Vec<Test> {
             exit(1);
         }
         let name = &parts[0];
-        let iterations = match parts[3].parse::<usize>() {
-            Ok(iterations) => iterations,
+        let cycles = match parts[3].parse::<usize>() {
+            Ok(cycles) => cycles,
             Err(err) => {
                 logger.log(
                     &LogLevel::Error,
-                    &format!("Invalid number of iterations: {}", err),
+                    &format!("Invalid number of cycles: {}", err),
                 );
                 exit(1);
             }
@@ -310,14 +305,9 @@ fn parse_test_file(logger: &Logger, test_file: &str) -> Vec<Test> {
             Err(_) => None,
         };
         if input_values.len() == 0 {
-            tests.push(Test::new(&name, None, test_result, iterations));
+            tests.push(Test::new(&name, None, test_result, cycles));
         } else {
-            tests.push(Test::new(
-                &name,
-                Some(input_values),
-                test_result,
-                iterations,
-            ));
+            tests.push(Test::new(&name, Some(input_values), test_result, cycles));
         }
     }
 
