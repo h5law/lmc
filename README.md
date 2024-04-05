@@ -121,10 +121,10 @@ The little minion controlling the computer follows the steps listed below:
 ## Instruction Set
 
 The little minion will read from the 3-digit number on the slip in the mailbox
-it was sent to, these are **\*\*\*\***op-codes**\*\*\*\*** and instruct the little minion as to what to
+it was sent to, these are **op-codes** and instruct the little minion as to what to
 do.
 
-### **\*\***\*\*\*\***\*\***Op Codes**\*\***\*\*\*\***\*\***
+### **Op Codes**
 
 - **LOAD (op-code 5)**
   - Instruction `5xx`
@@ -201,12 +201,12 @@ In the LMC **all** actions go through the calculator
 The steps taken by the little minion are called the **instruction cycle**. The
 instruction cycle has 2 stages:
 
-- \***\*\*\*\*\***Fetch\***\*\*\*\*\***
+- **Fetch**
   - the little minion finds the instruction to execute
     - the minion goes to the counter
     - reads the address there (and then increments it to be ready for the
       next cycle)
     - the minion goes to the mailbox at that address and reads the 3-digit
       number in the mailbox
-- **\*\*\*\***Execute**\*\*\*\***
+- **Execute**
   - the little minion performs the work specified in the instruction
